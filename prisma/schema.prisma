@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model age_ratings {
+  id               Int                @id
+  rating_issuer_id Int?
+  rating_id        Int?
+  rating_issuer    rating_issuer?     @relation(fields: [rating_issuer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_age_ratings_issuer")
+  ratings          ratings?           @relation(fields: [rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_age_ratings_rating")
+  game_age_ratings game_age_ratings[]
+
+  @@index([rating_issuer_id], map: "fk_age_ratings_issuer_idx")
+  @@index([rating_id], map: "fk_age_ratings_rating_idx")
+}
+
+model categories {
+  category_id Int     @id
+  description String  @db.VarChar(45)
+  games       games[]
+}
+
+model characters {
+  character_id    Int               @id
+  name            String            @db.VarChar(200)
+  url             String?           @db.VarChar(200)
+  game_characters game_characters[]
+}
+
+model developers {
+  developer_id     Int               @id @default(autoincrement())
+  name             String            @db.VarChar(100)
+  country          String?           @db.VarChar(50)
+  established_year Int?
+  url              String?           @db.VarChar(200)
+  game_developers  game_developers[]
+}
+
+model game_age_ratings {
+  game_id       Int
+  age_rating_id Int
+  age_ratings   age_ratings @relation(fields: [age_rating_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_game_age_ratings_age")
+  games         games       @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_age_ratings_game")
+
+  @@id([game_id, age_rating_id])
+  @@index([age_rating_id], map: "fk_game_age_ratings_age_idx")
+}
+
+model game_characters {
+  game_id       Int
+  characters_id Int
+  characters    characters @relation(fields: [characters_id], references: [character_id], onDelete: Cascade, map: "fk_game_characters_character")
+  games         games      @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_characters_game")
+
+  @@id([game_id, characters_id])
+  @@index([characters_id], map: "fk_game_characters_character_idx")
+}
+
+model game_covers {
+  cover_id Int     @id
+  game_id  Int?
+  height   Int?
+  width    Int?
+  url      String? @db.VarChar(200)
+  games    games?  @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_covers")
+
+  @@index([game_id], map: "fk_game_covers_idx")
+}
+
+model game_developers {
+  game_id      Int
+  developer_id Int
+  games        games      @relation(fields: [game_id], references: [game_id], onDelete: NoAction, onUpdate: NoAction, map: "game_developers_ibfk_1")
+  developers   developers @relation(fields: [developer_id], references: [developer_id], onDelete: NoAction, onUpdate: NoAction, map: "game_developers_ibfk_2")
+
+  @@id([game_id, developer_id])
+  @@index([developer_id], map: "developer_id")
+}
+
+model game_game_mode {
+  game_id      Int
+  game_mode_id Int
+  games        games      @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_game_mode_game")
+  game_modes   game_modes @relation(fields: [game_mode_id], references: [game_mode_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_game_game_mode_gm")
+
+  @@id([game_id, game_mode_id])
+  @@index([game_mode_id], map: "fk_game_game_mode_gm_idx")
+}
+
+model game_genre {
+  game_id  Int
+  genre_id Int
+  games    games  @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_genre_game")
+  genres   genres @relation(fields: [genre_id], references: [genre_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_game_genre_genre")
+
+  @@id([game_id, genre_id])
+  @@index([genre_id], map: "fk_game_genre_genre_idx")
+}
+
+model game_modes {
+  game_mode_id   Int              @id
+  name           String           @db.VarChar(45)
+  url            String?          @db.VarChar(200)
+  game_game_mode game_game_mode[]
+}
+
+model game_platform {
+  game_id     Int
+  platform_id Int
+  games       games     @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_platform_game")
+  platforms   platforms @relation(fields: [platform_id], references: [platform_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_game_platform_platform")
+
+  @@id([game_id, platform_id])
+  @@index([platform_id], map: "fk_game_platform_platform_idx")
+}
+
+model game_similar {
+  game_id                                   Int
+  similar_game_id                           Int
+  games_game_similar_game_idTogames         games @relation("game_similar_game_idTogames", fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_similar_game")
+  games_game_similar_similar_game_idTogames games @relation("game_similar_similar_game_idTogames", fields: [similar_game_id], references: [game_id], onDelete: Cascade, map: "fk_game_similar_similar")
+
+  @@id([game_id, similar_game_id])
+  @@index([similar_game_id], map: "fk_game_similar_similar_idx")
+}
+
+model game_video {
+  video_id String  @db.VarChar(200)
+  game_id  Int
+  name     String? @db.VarChar(200)
+  games    games   @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_video")
+
+  @@id([video_id, game_id])
+  @@index([game_id], map: "fk_game_video_idx")
+}
+
+model games {
+  game_id                                          Int                @id
+  name                                             String             @db.VarChar(200)
+  category                                         Int?
+  summary                                          String?            @db.VarChar(10000)
+  game_age_ratings                                 game_age_ratings[]
+  game_characters                                  game_characters[]
+  game_covers                                      game_covers[]
+  game_developers                                  game_developers[]
+  game_game_mode                                   game_game_mode[]
+  game_genre                                       game_genre[]
+  game_platform                                    game_platform[]
+  game_similar_game_similar_game_idTogames         game_similar[]     @relation("game_similar_game_idTogames")
+  game_similar_game_similar_similar_game_idTogames game_similar[]     @relation("game_similar_similar_game_idTogames")
+  game_video                                       game_video[]
+  categories                                       categories?        @relation(fields: [category], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_game_categories")
+  screenshots                                      screenshots[]
+  websites                                         websites[]
+
+  @@index([category], map: "fk_game_categories_idx")
+}
+
+model genres {
+  genre_id   Int          @id
+  name       String       @db.VarChar(45)
+  url        String?      @db.VarChar(200)
+  game_genre game_genre[]
+}
+
+model platforms {
+  platform_id      Int             @id
+  name             String          @db.VarChar(100)
+  alternative_name String?         @db.VarChar(200)
+  url              String?         @db.VarChar(200)
+  game_platform    game_platform[]
+}
+
+model rating_issuer {
+  id          Int           @id
+  description String        @db.VarChar(45)
+  age_ratings age_ratings[]
+}
+
+model ratings {
+  id          Int           @id
+  description String        @db.VarChar(45)
+  age_ratings age_ratings[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model safe_games {
+  game_id Int
+
+  @@index([game_id], map: "sg_idx")
+  @@ignore
+}
+
+model screenshots {
+  screenshot_id Int    @id
+  game_id       Int
+  height        Int?
+  width         Int?
+  url           String @db.VarChar(200)
+  animated      Int?   @db.TinyInt
+  games         games  @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_screenshots_game")
+
+  @@index([game_id], map: "fk_screenshots_game_idx")
+}
+
+model websites {
+  website_id Int
+  game_id    Int
+  trusted    Int?   @db.TinyInt
+  url        String @db.VarChar(200)
+  games      games  @relation(fields: [game_id], references: [game_id], onDelete: Cascade, map: "fk_game_website")
+
+  @@id([website_id, game_id])
+  @@index([game_id], map: "fk_game_video_idx")
+}

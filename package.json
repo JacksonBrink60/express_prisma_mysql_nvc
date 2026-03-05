@@ -1,0 +1,21 @@
+{
+  "name": "express_prisma_mysql_nvc",
+  "version": "1.0.0",
+  "description": "MVC - Model View Controller - architecture pattern\r - Model: represents the data and business logic\r - View: responsible for formatting output - in this case, it will just be returning our json data (we're making a rest api) (routes)\r - Controller: handles the logic of processing requests and orchestrating data flow",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14",
+    "prisma": "^6.19.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
